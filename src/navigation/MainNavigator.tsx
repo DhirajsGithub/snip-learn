@@ -6,7 +6,8 @@ import HobbySelectScreen from '../screens/HobbySelectScreen';
 export type RootStackParamList = {
   Onboarding: undefined;
   HobbySelect: undefined;
-  // Add other screens here later
+  LevelSelect: { hobby: 'chess' | 'poker' | 'guitar' };
+  LearningPath: { hobby: string; level: string };
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
