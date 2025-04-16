@@ -5,6 +5,7 @@ import LottieView from 'lottie-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '../navigation/MainNavigator';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { COLORS } from '../theme';
 
 type OnboardingNavProp = StackNavigationProp<RootStackParamList, 'Onboarding'>;
 
@@ -72,16 +73,16 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,
-    color: '#2D3436',
+    color: COLORS.title,
   },
   subtitle: {
     fontSize: 16,
     textAlign: 'center',
-    color: '#636E72',
+    color: COLORS.subtitle,
     paddingHorizontal: 40,
   },
   button: {
-    backgroundColor: '#6C5CE7',
+    backgroundColor: COLORS.action,
     paddingVertical: 15,
     paddingHorizontal: 40,
     borderRadius: 30,

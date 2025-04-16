@@ -3,11 +3,13 @@ import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 type HobbyState = {
   selected: 'chess' | 'poker' | 'guitar' | null;
   level: 'casual' | 'enthusiast' | 'pro' | null;
+  hobbyDetails: any;
 };
 
 const initialState: HobbyState = {
   selected: null,
   level: null,
+  hobbyDetails: null,
 };
 
 export const hobbySlice = createSlice({
@@ -26,8 +28,14 @@ export const hobbySlice = createSlice({
     ) => {
       state.level = action.payload;
     },
+    setHobbyDetails: (
+      state,
+      action: PayloadAction<any | null>,
+    ) => {
+      state.hobbyDetails = action.payload;
+    },
   },
 });
 
-export const {setHobby, setLevel} = hobbySlice.actions;
+export const {setHobby, setLevel, setHobbyDetails} = hobbySlice.actions;
 export default hobbySlice.reducer;

@@ -5,19 +5,18 @@ import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../navigation/MainNavigator';
 import HobbyCard from '../components/HobbyCard';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import { setHobby, setHobbyDetails } from '../slices/hobbySlice';
+import { useDispatch } from 'react-redux';
+import { COLORS } from '../theme';
+import {hobbies} from "../assets/data.json"
 
 type HobbySelectNavProp = StackNavigationProp<
   RootStackParamList,
   'HobbySelect'
 >;
 
-const hobbies = [
-  {id: '1', name: 'Chess', icon: 'chess-knight', color: '#2C3E50'},
-  {id: '2', name: 'Poker', icon: 'cards', color: '#E74C3C'},
-  {id: '3', name: 'Guitar', icon: 'guitar-electric', color: '#3498DB'},
-];
-
 const HobbySelectScreen = () => {
+  const dispatch = useDispatch();
   const navigation = useNavigation<HobbySelectNavProp>();
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -34,9 +33,9 @@ const HobbySelectScreen = () => {
             <HobbyCard
               key={hobby.id}
               onChevronPress={() => {
-                console.log('press');
-                Alert.alert("fdj")
-                navigation.navigate('LevelSelect', {hobby: hobby.id});
+                dispatch(setHobby(hobby.name as any))
+                dispatch(setHobbyDetails(hobby));
+                navigation.navigate('LevelSelect');
               }}
               hobby={hobby}
             />
@@ -50,7 +49,7 @@ const HobbySelectScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F9F9F9',
+    backgroundColor: COLORS.bg1,
   },
   container: {
     flex: 1,
@@ -63,12 +62,12 @@ const styles = StyleSheet.create({
   header: {
     fontSize: 32,
     fontWeight: '800',
-    color: '#2D3436',
+    color: COLORS.title,
     marginBottom: 4,
   },
   subheader: {
     fontSize: 16,
-    color: '#636E72',
+    color: COLORS.subtitle,
     fontWeight: '500',
   },
   scrollContainer: {

@@ -1,0 +1,7 @@
+{
+  "hobbies": [
+    {"id": "1", "name": "Chess", "icon": "chess-knight", "color": "#2C3E50"},
+    {"id": "2", "name": "Poker", "icon": "cards", "color": "#E74C3C"},
+    {"id": "3", "name": "Guitar", "icon": "guitar-electric", "color": "#3498DB"}
+  ]
+}

@@ -2,12 +2,14 @@ import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import HobbySelectScreen from '../screens/HobbySelectScreen';
+import LevelSelectScreen from '../screens/LevelSelectScreen';
+import LearningPathScreen from '../screens/LearningPathScreen';
 
 export type RootStackParamList = {
   Onboarding: undefined;
   HobbySelect: undefined;
-  LevelSelect: { hobby: 'chess' | 'poker' | 'guitar' };
-  LearningPath: { hobby: string; level: string };
+  LevelSelect: undefined;
+  LearningPath: undefined;
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -34,7 +36,21 @@ export const MainNavigator = () => {
         name="HobbySelect"
         component={HobbySelectScreen}
         options={{
-          gestureDirection: 'horizontal-inverted',
+          gestureDirection: 'horizontal',
+        }}
+      />
+      <Stack.Screen
+        name="LevelSelect"
+        component={LevelSelectScreen}
+        options={{
+          gestureDirection: 'horizontal',
+        }}
+      />
+      <Stack.Screen
+        name="LearningPath"
+        component={LearningPathScreen}
+        options={{
+          gestureDirection: 'horizontal',
         }}
       />
     </Stack.Navigator>
