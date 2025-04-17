@@ -7,8 +7,11 @@ import {
   ActivityIndicator,
   FlatList,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
+import {useFocusEffect} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import ConfettiCannon from 'react-native-confetti-cannon';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import {COLORS} from '../theme';
@@ -39,6 +42,8 @@ type LearningPathScreenProps = {
   navigation: any; 
 };
 
+const STORAGE_KEY_PREFIX = 'LEARNING_PATH_';
+
 const LearningPathScreen: React.FC<LearningPathScreenProps> = ({navigation}) => {
   const dispatch = useDispatch();
   const {
@@ -58,105 +63,24 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({navigation}) => 
     enableVibrateFallback: true,
     ignoreAndroidSystemSettings: false,
   };
-  console.log(selectedHobby, selectedLevel)
-  useEffect(() => {
-    const generatePath = async () => {
-      try {
-        // Artificial delay for UX
-        console.log(selectedHobby, selectedLevel)
-        const path : Technique[] = await generateLearningPath(selectedHobby, selectedLevel);
-        
-        // const path: Technique[] = [
-        //   {
-        //       "id": "1",
-        //       "name": "Understanding the Board and Piece Movement",
-        //       "description": "Learn the names of squares, how each piece moves (pawn, rook, knight, bishop, queen, king), and special moves like castling and en passant.",
-        //       "timeToMaster": "3 hours",
-        //       "difficulty": 1,
-        //       "prerequisites": []
-        //   },
-        //   {
-        //       "id": "2",
-        //       "name": "Basic Checkmate Patterns",
-        //       "description": "Learn how to checkmate with a queen and king, and a rook and king. Understanding these simplest checkmates is crucial for ending games.",
-        //       "timeToMaster": "4 hours",
-        //       "difficulty": 2,
-        //       "prerequisites": [
-        //           "Understanding the Board and Piece Movement"
-        //       ]
-        //   },
-        //   {
-        //       "id": "3",
-        //       "name": "The Importance of Piece Value",
-        //       "description": "Understand the relative value of each piece (pawn=1, knight/bishop=3, rook=5, queen=9) and how to make beneficial trades. Learn about material advantage.",
-        //       "timeToMaster": "2 hours",
-        //       "difficulty": 2,
-        //       "prerequisites": [
-        //           "Understanding the Board and Piece Movement"
-        //       ]
-        //   },
-        //   {
-        //       "id": "4",
-        //       "name": "Basic Opening Principles",
-        //       "description": "Focus on controlling the center of the board, developing your pieces (especially knights and bishops) early, and protecting your king.",
-        //       "timeToMaster": "5 hours",
-        //       "difficulty": 3,
-        //       "prerequisites": [
-        //           "Understanding the Board and Piece Movement",
-        //           "The Importance of Piece Value"
-        //       ]
-        //   },
-        //   {
-        //       "id": "5",
-        //       "name": "Recognizing and Avoiding Simple Traps",
-        //       "description": "Learn about common opening traps like the Scholar's Mate and how to avoid falling victim to them. Also, learn how to exploit them when your opponent makes the mistake.",
-        //       "timeToMaster": "4 hours",
-        //       "difficulty": 3,
-        //       "prerequisites": [
-        //           "Basic Opening Principles",
-        //           "The Importance of Piece Value"
-        //       ]
-        //   },
-        //   {
-        //       "id": "6",
-        //       "name": "Basic Tactical Motifs: Forks, Pins, and Skewers",
-        //       "description": "Learn to identify and utilize basic tactical motifs like forks (attacking two pieces at once), pins (restricting the movement of a piece), and skewers (similar to a pin, but the more valuable piece is attacked first).",
-        //       "timeToMaster": "6 hours",
-        //       "difficulty": 4,
-        //       "prerequisites": [
-        //           "The Importance of Piece Value",
-        //           "Recognizing and Avoiding Simple Traps"
-        //       ]
-        //   },
-        //   {
-        //       "id": "7",
-        //       "name": "Endgame Basics: King Activity and Pawn Promotion",
-        //       "description": "Learn how to activate your king in the endgame, create passed pawns, and promote pawns to queens to win. Understand basic pawn endgame principles.",
-        //       "timeToMaster": "5 hours",
-        //       "difficulty": 3,
-        //       "prerequisites": [
-        //           "Basic Checkmate Patterns",
-        //           "The Importance of Piece Value"
-        //       ]
-        //   },
-        //   {
-        //       "id": "8",
-        //       "name": "Playing and Analyzing Games",
-        //       "description": "The best way to improve is to play regularly and analyze your games afterward. Identify your mistakes and learn from them, even if it's just recognizing missed opportunities.",
-        //       "timeToMaster": "Ongoing",
-        //       "difficulty": 2,
-        //       "prerequisites": [
-        //           "Basic Tactical Motifs: Forks, Pins, and Skewers",
-        //           "Endgame Basics: King Activity and Pawn Promotion"
-        //       ]
-        //   }
-        // ];
-        
-        // Initialize progress for each technique
-        dispatch(setLearningPath(path));
+
+  const storageKey = useMemo(() => 
+    `${STORAGE_KEY_PREFIX}${selectedHobby}_${selectedLevel}`, 
+    [selectedHobby, selectedLevel]
+  );
+
+  const loadLearningPath = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      
+      // Check if we have a cached version in AsyncStorage
+      const cachedPath = await AsyncStorage.getItem(storageKey);
+      if (cachedPath) {
+        const parsedPath = JSON.parse(cachedPath);
+        dispatch(setLearningPath(parsedPath));
         
         // Initialize progress for each technique if not already in Redux
-        path.forEach(technique => {
+        parsedPath.forEach((technique: Technique) => {
           if (!progress[technique.id]) {
             dispatch(updateProgress({
               techniqueId: technique.id,
@@ -170,20 +94,48 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({navigation}) => 
         });
         
         setIsLoading(false);
-        setShowConfetti(true);
-      } catch (error) {
-        console.error('Failed to generate path:', error);
-        setIsLoading(false);
+        return;
       }
-    };
-    
-    // Only generate path if we don't have one already
-    if (!learningPath || learningPath.length === 0) {
-      generatePath();
-    } else {
+      
+      // If no cached version, generate a new one
+      const path: Technique[] = await generateLearningPath(selectedHobby, selectedLevel);
+      if(!path){
+        Alert.alert("Error generating learning path, Please try again after some time")
+        navigation.goBack()
+        return;
+      }
+      // Save to AsyncStorage
+      await AsyncStorage.setItem(storageKey, JSON.stringify(path));
+      
+      dispatch(setLearningPath(path));
+      
+      // Initialize progress for each technique
+      path.forEach(technique => {
+        if (!progress[technique.id]) {
+          dispatch(updateProgress({
+            techniqueId: technique.id,
+            progress: {
+              completed: false,
+              skipped: false,
+              progress: 0,
+            },
+          }));
+        }
+      });
+      
+      setIsLoading(false);
+      setShowConfetti(true);
+    } catch (error) {
+      console.error('Failed to load/generate path:', error);
       setIsLoading(false);
     }
-  }, [selectedHobby, selectedLevel, dispatch, learningPath.length, progress]);
+  }, [selectedHobby, selectedLevel, dispatch, progress, storageKey]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadLearningPath();
+    }, [selectedLevel, selectedHobby])
+  );
 
   const handleCompleteTechnique = useCallback((techniqueId: string) => {
     ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
@@ -212,7 +164,8 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({navigation}) => 
   }, [dispatch, hapticOptions]);
 
   const handleTapTechnique = useCallback((technique: Technique) => {
-    navigation.navigate('TechniqueDetail', {technique});
+    console.log("technique ", technique)
+    // navigation.navigate('TechniqueDetail', {technique});
   }, [navigation]);
 
   // Calculate overall progress
@@ -223,6 +176,7 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({navigation}) => 
     return completed / learningPath.length;
   }, [progress, learningPath]);
 
+  console.log("learningPath ", learningPath)
   if (isLoading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>

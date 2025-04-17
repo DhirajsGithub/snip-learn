@@ -42,30 +42,6 @@ export const generateLearningPath = async (hobby, level) => {
     throw new Error('Could not parse JSON from AI response');
   } catch (error) {
     console.error('Error generating learning path:', error);
-    return generateFallbackPath(hobby, level);
+    return null;
   }
-};
-
-// Fallback in case AI fails
-const generateFallbackPath = (hobby, level) => {
-  // Some predefined paths based on hobby and level
-  const fallbackPaths = {
-    chess: {
-      casual: [
-        {
-          id: '1',
-          name: 'Chess Basics',
-          description: 'Learn how each piece moves and basic rules of the game.',
-          timeToMaster: '2 hours',
-          difficulty: 1,
-          prerequisites: [],
-        },
-        // Add more items...
-      ],
-      // Add more levels...
-    },
-    // Add more hobbies...
-  };
-  
-  return fallbackPaths[hobby]?.[level] || [];
 };
