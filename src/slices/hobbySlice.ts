@@ -4,12 +4,20 @@ type HobbyState = {
   selected: 'chess' | 'poker' | 'guitar' | null;
   level: 'casual' | 'enthusiast' | 'pro' | null;
   hobbyDetails: any;
+  learningPath: any[];
+  progress: Record<string, {
+    completed: boolean;
+    skipped: boolean;
+    progress: number;
+  }>;
 };
 
 const initialState: HobbyState = {
   selected: null,
   level: null,
   hobbyDetails: null,
+  learningPath: [],
+  progress: {},
 };
 
 export const hobbySlice = createSlice({
@@ -34,8 +42,37 @@ export const hobbySlice = createSlice({
     ) => {
       state.hobbyDetails = action.payload;
     },
+    setLearningPath: (
+      state,
+      action: PayloadAction<any[]>,
+    ) => {
+      state.learningPath = action.payload;
+    },
+    updateProgress: (
+      state,
+      action: PayloadAction<{
+        techniqueId: string;
+        progress: {
+          completed?: boolean;
+          skipped?: boolean;
+          progress?: number;
+        };
+      }>,
+    ) => {
+      const {techniqueId, progress} = action.payload;
+      state.progress[techniqueId] = {
+        ...state.progress[techniqueId],
+        ...progress,
+      };
+    },
   },
 });
 
-export const {setHobby, setLevel, setHobbyDetails} = hobbySlice.actions;
+export const {
+  setHobby,
+  setLevel,
+  setHobbyDetails,
+  setLearningPath,
+  updateProgress,
+} = hobbySlice.actions;
 export default hobbySlice.reducer;
