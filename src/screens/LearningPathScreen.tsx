@@ -18,8 +18,9 @@ import {COLORS} from '../theme';
 import TechniqueCard from '../components/TechniqueCard';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as Progress from 'react-native-progress';
-import { setLearningPath, updateProgress } from '../slices/hobbySlice';
-import { generateLearningPath } from '../components/services/aiService';
+import {setLearningPath, updateProgress} from '../slices/hobbySlice';
+import {generateLearningPath} from '../components/services/aiService';
+import Header from '../components/common/Header';
 
 type Technique = {
   id: string;
@@ -39,90 +40,106 @@ type ProgressState = {
 };
 
 type LearningPathScreenProps = {
-  navigation: any; 
+  navigation: any;
 };
 
 const STORAGE_KEY_PREFIX = 'LEARNING_PATH_';
 
-const LearningPathScreen: React.FC<LearningPathScreenProps> = ({navigation}) => {
+const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
+  navigation,
+}) => {
   const dispatch = useDispatch();
   const {
-    selected: selectedHobby, 
-    level: selectedLevel, 
+    selected: selectedHobby,
+    level: selectedLevel,
     hobbyDetails,
     learningPath,
-    progress
+    progress,
   } = useSelector((state: any) => state.hobby);
-  
+
   const [isLoading, setIsLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
-  
+
   const confettiRef = useRef<ConfettiCannon>(null);
-  
+
   const hapticOptions = {
     enableVibrateFallback: true,
     ignoreAndroidSystemSettings: false,
   };
 
-  const storageKey = useMemo(() => 
-    `${STORAGE_KEY_PREFIX}${selectedHobby}_${selectedLevel}`, 
-    [selectedHobby, selectedLevel]
+  const storageKey = useMemo(
+    () => `${STORAGE_KEY_PREFIX}${selectedHobby}_${selectedLevel}`,
+    [selectedHobby, selectedLevel],
   );
 
   const loadLearningPath = useCallback(async () => {
+    
     try {
       setIsLoading(true);
-      
       // Check if we have a cached version in AsyncStorage
       const cachedPath = await AsyncStorage.getItem(storageKey);
       if (cachedPath) {
         const parsedPath = JSON.parse(cachedPath);
         dispatch(setLearningPath(parsedPath));
-        
-        // Initialize progress for each technique if not already in Redux
-        parsedPath.forEach((technique: Technique) => {
-          if (!progress[technique.id]) {
-            dispatch(updateProgress({
-              techniqueId: technique.id,
-              progress: {
-                completed: false,
-                skipped: false,
-                progress: 0,
-              },
-            }));
-          }
-        });
-        
+
+        // First get the old key
+        const oldKey = await AsyncStorage.getItem('hobbyLevel');
+        if (oldKey !== storageKey) {
+          // Only initialize if it's a new hobby-level combination
+          parsedPath.forEach((technique: Technique) => {
+            dispatch(
+              updateProgress({
+                techniqueId: technique.id,
+                progress: {
+                  completed: false,
+                  skipped: false,
+                  progress: 0,
+                },
+              }),
+            );
+          });
+
+          // Store the new key
+          await AsyncStorage.setItem('hobbyLevel', storageKey);
+        }
+
         setIsLoading(false);
         return;
       }
-      
+
+      // dispatch(updateProgress({}));
+
       // If no cached version, generate a new one
-      const path: Technique[] = await generateLearningPath(selectedHobby, selectedLevel);
-      if(!path){
-        Alert.alert("Error generating learning path, Please try again after some time")
-        navigation.goBack()
+      const path: Technique[] = await generateLearningPath(
+        selectedHobby,
+        selectedLevel,
+      );
+      if (!path) {
+        Alert.alert(
+          'Error generating learning path, Please try again after some time',
+        );
+        navigation.goBack();
         return;
       }
       // Save to AsyncStorage
       await AsyncStorage.setItem(storageKey, JSON.stringify(path));
-      
+
       dispatch(setLearningPath(path));
-      
+
       // Initialize progress for each technique
       path.forEach(technique => {
-        if (!progress[technique.id]) {
-          dispatch(updateProgress({
+        dispatch(
+          updateProgress({
             techniqueId: technique.id,
             progress: {
               completed: false,
               skipped: false,
               progress: 0,
             },
-          }));
-        }
+          }),
+        );
       });
-      
+
       setIsLoading(false);
       setShowConfetti(true);
     } catch (error) {
@@ -134,57 +151,74 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({navigation}) => 
   useFocusEffect(
     useCallback(() => {
       loadLearningPath();
-    }, [selectedLevel, selectedHobby])
+    }, [selectedLevel, selectedHobby]),
   );
 
-  const handleCompleteTechnique = useCallback((techniqueId: string) => {
-    ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
-    
-    dispatch(updateProgress({
-      techniqueId,
-      progress: {
-        completed: true,
-        skipped: false,
-        progress: 1,
-      },
-    }));
-  }, [dispatch, hapticOptions]);
+  const handleCompleteTechnique = useCallback(
+    (techniqueId: string) => {
+      ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
 
-  const handleSkipTechnique = useCallback((techniqueId: string) => {
-    ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
-    
-    dispatch(updateProgress({
-      techniqueId,
-      progress: {
-        completed: false,
-        skipped: true,
-        progress: 0,
-      },
-    }));
-  }, [dispatch, hapticOptions]);
+      dispatch(
+        updateProgress({
+          techniqueId,
+          progress: {
+            completed: true,
+            skipped: false,
+            progress: 1,
+          },
+        }),
+      );
+    },
+    [dispatch, hapticOptions],
+  );
 
-  const handleTapTechnique = useCallback((technique: Technique) => {
-    console.log("technique ", technique)
-    // navigation.navigate('TechniqueDetail', {technique});
-  }, [navigation]);
+  const handleSkipTechnique = useCallback(
+    (techniqueId: string) => {
+      ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
+
+      dispatch(
+        updateProgress({
+          techniqueId,
+          progress: {
+            completed: false,
+            skipped: true,
+            progress: 0,
+          },
+        }),
+      );
+    },
+    [dispatch, hapticOptions],
+  );
+
+  const handleTapTechnique = useCallback(
+    (technique: Technique) => {
+      navigation.navigate('TechniqueDetail', {technique});
+    },
+    [navigation],
+  );
 
   // Calculate overall progress
   const calculateOverallProgress = useCallback((): number => {
     if (!learningPath || learningPath.length === 0) return 0;
-    
+
     const completed = Object.values(progress).filter(p => p?.completed).length;
     return completed / learningPath.length;
   }, [progress, learningPath]);
 
-  console.log("learningPath ", learningPath)
   if (isLoading) {
     return (
       <SafeAreaView style={styles.loadingContainer}>
-        <Text style={styles.loadingTitle}>Crafting your personalized learning path</Text>
+        <Text style={styles.loadingTitle}>
+          Crafting your personalized learning path
+        </Text>
         <Text style={styles.loadingSubtitle}>
           We're filtering out useless YouTube videos...
         </Text>
-        <ActivityIndicator size="large" color={COLORS.action} style={styles.loader} />
+        <ActivityIndicator
+          size="large"
+          color={COLORS.action}
+          style={styles.loader}
+        />
       </SafeAreaView>
     );
   }
@@ -192,42 +226,38 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({navigation}) => 
   return (
     <SafeAreaView style={styles.container}>
       {showConfetti && (
-        <ConfettiCannon 
+        <ConfettiCannon
           ref={confettiRef}
-          count={200} 
-          origin={{x: -10, y: 0}} 
-          autoStart={true} 
+          count={200}
+          origin={{x: -10, y: 0}}
+          autoStart={true}
           fadeOut={true}
           onAnimationEnd={() => setShowConfetti(false)}
         />
       )}
-      
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={24} color={COLORS.title} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>
-          Your 8-Step Path to {selectedLevel} {selectedHobby}
-        </Text>
-      </View>
-      
+
+      <Header
+        title={`Your 8-Step Path to ${selectedLevel} ${selectedHobby}`}
+        onBackPress={() => navigation.goBack()}
+      />
+
       <View style={styles.progressContainer}>
+        <View style={{flexGrow: 1}}>
+          <Progress.Bar
+            progress={calculateOverallProgress()}
+            width={null}
+            height={8}
+            color={COLORS.action}
+            unfilledColor="rgba(0,0,0,0.1)"
+            borderWidth={0}
+            borderRadius={4}
+          />
+        </View>
         <Text style={styles.progressText}>
-          {Math.round(calculateOverallProgress() * 100)}% Complete
+          {Math.round(calculateOverallProgress() * 100)}%
         </Text>
-        <Progress.Bar
-          progress={calculateOverallProgress()}
-          width={null}
-          height={8}
-          color={COLORS.action}
-          unfilledColor="rgba(0,0,0,0.1)"
-          borderWidth={0}
-          borderRadius={4}
-        />
       </View>
-      
+
       <FlatList
         data={learningPath}
         keyExtractor={item => item.id}
@@ -259,7 +289,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   loadingTitle: {
-    fontSize: 22, 
+    fontSize: 22,
     fontWeight: 'bold',
     color: COLORS.title,
     marginBottom: 8,
@@ -290,8 +320,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   progressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 18,
     paddingHorizontal: 16,
     marginBottom: 16,
+    marginTop: 12,
   },
   progressText: {
     fontSize: 16,
@@ -302,7 +336,7 @@ const styles = StyleSheet.create({
   listContainer: {
     paddingHorizontal: 16,
     paddingBottom: 16,
-    gap: 8
+    gap: 8,
   },
 });
 

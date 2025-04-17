@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   View,
   Text,
@@ -6,14 +6,18 @@ import {
   ScrollView,
   SafeAreaView,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import {Card} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import * as Progress from 'react-native-progress';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Markdown from 'react-native-markdown-display';
 import {COLORS} from '../theme';
 import {useSelector, useDispatch} from 'react-redux';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { updateProgress } from '../slices/hobbySlice';
+import { generateTechniqueContent } from '../components/services/aiService';
+import Header from '../components/common/Header';
 
 type Technique = {
   id: string;
@@ -33,12 +37,19 @@ type TechniqueDetailScreenProps = {
   };
 };
 
+const STORAGE_KEY_PREFIX = 'TECHNIQUE_CONTENT_';
+
 const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
   navigation,
   route,
 }) => {
   const {technique} = route.params;
   const dispatch = useDispatch();
+  const {
+    selected: selectedHobby, 
+    level: selectedLevel
+  } = useSelector((state: any) => state.hobby);
+  
   const progress = useSelector((state: any) => 
     state.hobby.progress[technique.id] || {
       completed: false,
@@ -47,13 +58,53 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
     }
   );
   
+  const [content, setContent] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+  
   const hapticOptions = {
     enableVibrateFallback: true,
     ignoreAndroidSystemSettings: false,
   };
   
+  const storageKey = `${STORAGE_KEY_PREFIX}${selectedHobby}_${selectedLevel}_${technique.id}`;
+
+  const loadTechniqueContent = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      
+      // Check if we have cached content
+      const cachedContent = await AsyncStorage.getItem(storageKey);
+      
+      if (cachedContent) {
+        setContent(cachedContent);
+        setIsLoading(false);
+        return;
+      }
+      
+      // Generate new content from AI
+      const generatedContent = await generateTechniqueContent(
+        selectedHobby,
+        selectedLevel,
+        technique
+      );
+
+      
+      // Save to cache
+      await AsyncStorage.setItem(storageKey, generatedContent);
+      setContent(generatedContent);
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Failed to load/generate technique content:', error);
+      setIsLoading(false);
+      setContent(`# ${technique.name}\n\n${technique.description}\n\n*Could not load additional resources*`);
+    }
+  }, [selectedHobby, selectedLevel, technique, storageKey]);
+
+  useEffect(() => {
+    loadTechniqueContent();
+  }, [loadTechniqueContent]);
+
   const handleComplete = () => {
-    ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
     
     dispatch(updateProgress({
       techniqueId: technique.id,
@@ -67,7 +118,6 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
   };
   
   const handleSkip = () => {
-    ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
     
     dispatch(updateProgress({
       techniqueId: technique.id,
@@ -80,76 +130,64 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
     navigation.goBack();
   };
 
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity 
+            style={styles.backButton}
+            onPress={() => navigation.goBack()}>
+            <Icon name="arrow-left" size={24} color={COLORS.title} />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>{technique.name}</Text>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={COLORS.action} />
+          <Text style={styles.loadingText}>Generating learning content...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}>
-          <Icon name="arrow-left" size={24} color={COLORS.title} />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>{technique.name}</Text>
-      </View>
+      <Header
+        title={technique.name}
+        onBackPress={() => navigation.goBack()}
+      />
       
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.card}>
           <Card.Content>
-            <View style={styles.difficultyContainer}>
-              <Text style={styles.difficultyLabel}>Difficulty:</Text>
-              <View style={styles.stars}>
-                {[...Array(5)].map((_, index) => (
-                  <Icon
-                    key={index}
-                    name="star"
-                    size={18}
-                    color={index < technique.difficulty ? COLORS.action : 'rgba(0,0,0,0.2)'}
-                  />
-                ))}
+            <View style={styles.metaContainer}>
+              <View style={styles.difficultyContainer}>
+                <Text style={styles.metaLabel}>Difficulty:</Text>
+                <View style={styles.stars}>
+                  {[...Array(5)].map((_, index) => (
+                    <Icon
+                      key={index}
+                      name="star"
+                      size={18}
+                      color={index < technique.difficulty ? COLORS.action : 'rgba(0,0,0,0.2)'}
+                    />
+                  ))}
+                </View>
+              </View>
+              
+              <View style={styles.timeContainer}>
+                <Icon name="clock-outline" size={18} color={COLORS.subtitle} />
+                <Text style={styles.metaText}>
+                  {technique.timeToMaster}
+                </Text>
               </View>
             </View>
             
-            <View style={styles.timeContainer}>
-              <Icon name="clock-outline" size={18} color={COLORS.subtitle} />
-              <Text style={styles.timeText}>
-                Time to master: {technique.timeToMaster}
-              </Text>
-            </View>
-            
-            <Text style={styles.sectionTitle}>Description</Text>
-            <Text style={styles.description}>{technique.description}</Text>
-            
-            {technique.prerequisites && technique.prerequisites.length > 0 && (
-              <>
-                <Text style={styles.sectionTitle}>Prerequisites</Text>
-                {technique.prerequisites.map((prereq, index) => (
-                  <Text key={index} style={styles.prerequisite}>
-                    • {prereq}
-                  </Text>
-                ))}
-              </>
-            )}
-            
-            <Text style={styles.sectionTitle}>Key Points</Text>
-            <Text style={styles.keyPoint}>
-              • Focus on understanding the fundamentals
-            </Text>
-            <Text style={styles.keyPoint}>
-              • Practice regularly to build muscle memory
-            </Text>
-            <Text style={styles.keyPoint}>
-              • Start slow and gradually increase speed
-            </Text>
-            
-            <Text style={styles.sectionTitle}>Resources</Text>
-            <Text style={styles.resource}>
-              • Books and articles to read
-            </Text>
-            <Text style={styles.resource}>
-              • Online tutorials and courses
-            </Text>
-            <Text style={styles.resource}>
-              • Practice exercises
-            </Text>
+            <Markdown 
+              style={markdownStyles}
+              mergeStyle={true}
+            >
+              {content}
+            </Markdown>
           </Card.Content>
         </View>
       </ScrollView>
@@ -195,6 +233,56 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
   );
 };
 
+const markdownStyles = {
+  heading1: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: COLORS.title,
+    marginTop: 24,
+    marginBottom: 16,
+  },
+  heading2: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.title,
+    marginTop: 20,
+    marginBottom: 12,
+  },
+  heading3: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.title,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  body: {
+    fontSize: 16,
+    color: COLORS.subtitle,
+    lineHeight: 24,
+  },
+  strong: {
+    fontWeight: 'bold',
+    color: COLORS.title,
+  },
+  link: {
+    color: COLORS.action,
+  },
+  bullet_list: {
+    marginBottom: 8,
+  },
+  ordered_list: {
+    marginBottom: 8,
+  },
+  list_item: {
+    fontSize: 16,
+    color: COLORS.subtitle,
+    marginBottom: 4,
+  },
+  paragraph: {
+    marginBottom: 16,
+  },
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -216,22 +304,31 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 16,
+    marginTop: 12,
     paddingBottom: 80, // Add space for the footer
   },
   card: {
     borderRadius: 12,
     elevation: 4,
   },
+  metaContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
   difficultyContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
   },
-  difficultyLabel: {
+  metaLabel: {
     fontSize: 16,
     color: COLORS.title,
     marginRight: 8,
+  },
+  metaText: {
+    fontSize: 16,
+    color: COLORS.subtitle,
+    marginLeft: 8,
   },
   stars: {
     flexDirection: 'row',
@@ -239,39 +336,16 @@ const styles = StyleSheet.create({
   timeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
   },
-  timeText: {
-    fontSize: 16,
-    color: COLORS.subtitle,
-    marginLeft: 8,
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.title,
+  loadingText: {
     marginTop: 16,
-    marginBottom: 8,
-  },
-  description: {
     fontSize: 16,
     color: COLORS.subtitle,
-    lineHeight: 24,
-  },
-  prerequisite: {
-    fontSize: 16,
-    color: COLORS.subtitle,
-    marginBottom: 4,
-  },
-  keyPoint: {
-    fontSize: 16,
-    color: COLORS.subtitle,
-    marginBottom: 4,
-  },
-  resource: {
-    fontSize: 16,
-    color: COLORS.subtitle,
-    marginBottom: 4,
   },
   footer: {
     position: 'absolute',
@@ -283,7 +357,6 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(0,0,0,0.1)',
     padding: 16,
     backgroundColor: COLORS.bg1,
-    marginBottom: 12,
   },
   footerButton: {
     flex: 1,
