@@ -19,7 +19,7 @@ const Stack = createStackNavigator<RootStackParamList>();
 export const MainNavigator = () => {
   return (
     <Stack.Navigator
-      initialRouteName="LearningPath"
+      initialRouteName="Onboarding"
       screenOptions={{
         headerShown: false,
         gestureEnabled: true,

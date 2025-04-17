@@ -103,6 +103,7 @@ const styles = StyleSheet.create({
   },
   innerContianer:{
     padding: 24,
+    paddingBottom: 12,
     flex: 1,
   },
   header: {

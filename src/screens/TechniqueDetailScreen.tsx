@@ -1,4 +1,3 @@
-// src/screens/TechniqueDetailScreen.js
 import React from 'react';
 import {
   View,
@@ -13,22 +12,54 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as Progress from 'react-native-progress';
 import {COLORS} from '../theme';
 import {useSelector, useDispatch} from 'react-redux';
+import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { updateProgress } from '../slices/hobbySlice';
 
-const TechniqueDetailScreen = ({navigation, route}) => {
+type Technique = {
+  id: string;
+  name: string;
+  description: string;
+  timeToMaster: string;
+  difficulty: number;
+  prerequisites: string[];
+};
+
+type TechniqueDetailScreenProps = {
+  navigation: any;
+  route: {
+    params: {
+      technique: Technique;
+    };
+  };
+};
+
+const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
+  navigation,
+  route,
+}) => {
   const {technique} = route.params;
   const dispatch = useDispatch();
-  const progress = useSelector(state => state.hobby.progress[technique.id] || {
-    completed: false,
-    skipped: false,
-    progress: 0,
-  });
+  const progress = useSelector((state: any) => 
+    state.hobby.progress[technique.id] || {
+      completed: false,
+      skipped: false,
+      progress: 0,
+    }
+  );
+  
+  const hapticOptions = {
+    enableVibrateFallback: true,
+    ignoreAndroidSystemSettings: false,
+  };
   
   const handleComplete = () => {
+    ReactNativeHapticFeedback.trigger('impactMedium', hapticOptions);
+    
     dispatch(updateProgress({
       techniqueId: technique.id,
       progress: {
         completed: true,
+        skipped: false,
         progress: 1,
       },
     }));
@@ -36,10 +67,14 @@ const TechniqueDetailScreen = ({navigation, route}) => {
   };
   
   const handleSkip = () => {
+    ReactNativeHapticFeedback.trigger('impactLight', hapticOptions);
+    
     dispatch(updateProgress({
       techniqueId: technique.id,
       progress: {
+        completed: false,
         skipped: true,
+        progress: 0,
       },
     }));
     navigation.goBack();
@@ -119,21 +154,43 @@ const TechniqueDetailScreen = ({navigation, route}) => {
         </View>
       </ScrollView>
       
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={[styles.footerButton, styles.skipButton]}
-          onPress={handleSkip}>
-          <Icon name="skip-forward" size={22} color={COLORS.white} />
-          <Text style={styles.buttonText}>Skip</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.footerButton, styles.completeButton]}
-          onPress={handleComplete}>
-          <Icon name="check" size={22} color={COLORS.white} />
-          <Text style={styles.buttonText}>Complete</Text>
-        </TouchableOpacity>
-      </View>
+      {!progress.completed && !progress.skipped && (
+        <View style={styles.footer}>
+          <TouchableOpacity 
+            style={[styles.footerButton, styles.skipButton]}
+            onPress={handleSkip}>
+            <Icon name="skip-forward" size={22} color={COLORS.white} />
+            <Text style={styles.buttonText}>Skip</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={[styles.footerButton, styles.completeButton]}
+            onPress={handleComplete}>
+            <Icon name="check" size={22} color={COLORS.white} />
+            <Text style={styles.buttonText}>Complete</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      
+      {(progress.completed || progress.skipped) && (
+        <View style={styles.footer}>
+          <TouchableOpacity 
+            style={[styles.footerButton, styles.resetButton]}
+            onPress={() => {
+              dispatch(updateProgress({
+                techniqueId: technique.id,
+                progress: {
+                  completed: false,
+                  skipped: false,
+                  progress: 0,
+                },
+              }));
+            }}>
+            <Icon name="refresh" size={22} color={COLORS.white} />
+            <Text style={styles.buttonText}>Reset Progress</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 };
@@ -160,6 +217,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
+    paddingBottom: 80, // Add space for the footer
   },
   card: {
     borderRadius: 12,
@@ -216,10 +274,16 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
     borderTopWidth: 1,
     borderTopColor: 'rgba(0,0,0,0.1)',
     padding: 16,
+    backgroundColor: COLORS.bg1,
+    marginBottom: 12,
   },
   footerButton: {
     flex: 1,
@@ -235,6 +299,9 @@ const styles = StyleSheet.create({
   },
   completeButton: {
     backgroundColor: '#00b894',
+  },
+  resetButton: {
+    backgroundColor: COLORS.action,
   },
   buttonText: {
     color: COLORS.white,
