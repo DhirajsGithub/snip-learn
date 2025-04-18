@@ -18,6 +18,7 @@ import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import { updateProgress } from '../slices/hobbySlice';
 import { generateTechniqueContent } from '../components/services/aiService';
 import Header from '../components/common/Header';
+import { getTechniqueContentKey } from '../utils/localStorage.Utils';
 
 type Technique = {
   id: string;
@@ -66,7 +67,8 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
     ignoreAndroidSystemSettings: false,
   };
   
-  const storageKey = `${STORAGE_KEY_PREFIX}${selectedHobby}_${selectedLevel}_${technique.id}`;
+  // const storageKey = `${STORAGE_KEY_PREFIX}${selectedHobby}_${selectedLevel}_${technique.id}`;
+  const storageKey = getTechniqueContentKey(selectedHobby, selectedLevel, technique.id)
 
   const loadTechniqueContent = useCallback(async () => {
     try {

@@ -18,9 +18,14 @@ import {COLORS} from '../theme';
 import TechniqueCard from '../components/TechniqueCard';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as Progress from 'react-native-progress';
-import {setLearningPath, updateProgress} from '../slices/hobbySlice';
+import {
+  setLearningPath,
+  setProgress,
+  updateProgress,
+} from '../slices/hobbySlice';
 import {generateLearningPath} from '../components/services/aiService';
 import Header from '../components/common/Header';
+import {getLearningPathKey, getProgressKey} from '../utils/localStorage.Utils';
 
 type Technique = {
   id: string;
@@ -67,25 +72,23 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
     ignoreAndroidSystemSettings: false,
   };
 
-  const storageKey = useMemo(
-    () => `${STORAGE_KEY_PREFIX}${selectedHobby}_${selectedLevel}`,
-    [selectedHobby, selectedLevel],
-  );
+  const pathStorageKey = getLearningPathKey(selectedHobby, selectedLevel);
+  const progressStorageKey = getProgressKey(selectedHobby, selectedLevel);
 
   const loadLearningPath = useCallback(async () => {
-    
     try {
       setIsLoading(true);
       // Check if we have a cached version in AsyncStorage
-      const cachedPath = await AsyncStorage.getItem(storageKey);
+      const cachedPath = await AsyncStorage.getItem(pathStorageKey);
+      const cachedProgress = await AsyncStorage.getItem(progressStorageKey);
       if (cachedPath) {
         const parsedPath = JSON.parse(cachedPath);
         dispatch(setLearningPath(parsedPath));
 
-        // First get the old key
-        const oldKey = await AsyncStorage.getItem('hobbyLevel');
-        if (oldKey !== storageKey) {
-          // Only initialize if it's a new hobby-level combination
+        if (cachedProgress) {
+          const parsedProgress = JSON.parse(cachedProgress);
+          dispatch(setProgress(parsedProgress));
+        } else {
           parsedPath.forEach((technique: Technique) => {
             dispatch(
               updateProgress({
@@ -98,16 +101,11 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
               }),
             );
           });
-
-          // Store the new key
-          await AsyncStorage.setItem('hobbyLevel', storageKey);
         }
 
         setIsLoading(false);
         return;
       }
-
-      // dispatch(updateProgress({}));
 
       // If no cached version, generate a new one
       const path: Technique[] = await generateLearningPath(
@@ -122,7 +120,7 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
         return;
       }
       // Save to AsyncStorage
-      await AsyncStorage.setItem(storageKey, JSON.stringify(path));
+      await AsyncStorage.setItem(pathStorageKey, JSON.stringify(path));
 
       dispatch(setLearningPath(path));
 
@@ -146,7 +144,7 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
       console.error('Failed to load/generate path:', error);
       setIsLoading(false);
     }
-  }, [selectedHobby, selectedLevel, dispatch, progress, storageKey]);
+  }, [selectedHobby, selectedLevel, dispatch, progress, pathStorageKey]);
 
   useFocusEffect(
     useCallback(() => {

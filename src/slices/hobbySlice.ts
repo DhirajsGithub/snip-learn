@@ -1,4 +1,5 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 type HobbyState = {
   selected: 'chess' | 'poker' | 'guitar' | null;
@@ -48,6 +49,16 @@ export const hobbySlice = createSlice({
     ) => {
       state.learningPath = action.payload;
     },
+    setProgress: (
+      state,
+      action: PayloadAction<Record<string, {
+        completed: boolean;
+        skipped: boolean;
+        progress: number;
+      }>>,
+    ) => {
+      state.progress = action.payload;
+    },
     updateProgress: (
       state,
       action: PayloadAction<{
@@ -64,6 +75,15 @@ export const hobbySlice = createSlice({
         ...state.progress[techniqueId],
         ...progress,
       };
+      
+      // Save to AsyncStorage after updating the state
+      if (state.selected && state.level) {
+        const storageKey = `PROGRESS_${state.selected}_${state.level}`;
+        AsyncStorage.setItem(storageKey, JSON.stringify(state.progress))
+          .catch(error => {
+            console.error('Failed to save progress to AsyncStorage:', error);
+          });
+      }
     },
   },
 });
@@ -73,6 +93,7 @@ export const {
   setLevel,
   setHobbyDetails,
   setLearningPath,
+  setProgress,
   updateProgress,
 } = hobbySlice.actions;
 export default hobbySlice.reducer;
