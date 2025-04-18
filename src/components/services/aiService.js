@@ -1,5 +1,6 @@
 // src/services/aiService.js
 import {GoogleGenerativeAI} from '@google/generative-ai';
+import hobbyData from '../../assets/data.json';
 
 // Replace with your API key
 const API_KEY = 'AIzaSyCaYVuWzDQYCXqLZ9cC87lZaHexReJBaFE';
@@ -102,15 +103,9 @@ export const generateTechniqueContent = async (
 };
 
 // Helper functions
-const getHobbyEmoji = (hobby) => {
-  const emojis = {
-    'Chess': '♟️',
-    'Poker': '🃏',
-    'Guitar': '🎸',
-    'Programming': '💻',
-    'Photography': '📸'
-  };
-  return emojis[hobby] || '✨';
+const getHobbyEmoji = (hobbyName) => {
+  const hobby = hobbyData.hobbies.find(h => h.name.toLowerCase() === hobbyName.toLowerCase());
+  return hobby?.emoji || '✨';
 };
 
 const fallbackContent = (technique) => {

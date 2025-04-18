@@ -15,10 +15,10 @@ import Markdown from 'react-native-markdown-display';
 import {COLORS} from '../theme';
 import {useSelector, useDispatch} from 'react-redux';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
-import { updateProgress } from '../slices/hobbySlice';
-import { generateTechniqueContent } from '../components/services/aiService';
+import {updateProgress} from '../slices/hobbySlice';
+import {generateTechniqueContent} from '../components/services/aiService';
 import Header from '../components/common/Header';
-import { getTechniqueContentKey } from '../utils/localStorage.Utils';
+import {getTechniqueContentKey} from '../utils/localStorage.Utils';
 
 type Technique = {
   id: string;
@@ -46,51 +46,54 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
 }) => {
   const {technique} = route.params;
   const dispatch = useDispatch();
-  const {
-    selected: selectedHobby, 
-    level: selectedLevel
-  } = useSelector((state: any) => state.hobby);
-  
-  const progress = useSelector((state: any) => 
-    state.hobby.progress[technique.id] || {
-      completed: false,
-      skipped: false,
-      progress: 0,
-    }
+  const {selected: selectedHobby, level: selectedLevel} = useSelector(
+    (state: any) => state.hobby,
   );
-  
+
+  const progress = useSelector(
+    (state: any) =>
+      state.hobby.progress[technique.id] || {
+        completed: false,
+        skipped: false,
+        progress: 0,
+      },
+  );
+
   const [content, setContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const hapticOptions = {
     enableVibrateFallback: true,
     ignoreAndroidSystemSettings: false,
   };
-  
+
   // const storageKey = `${STORAGE_KEY_PREFIX}${selectedHobby}_${selectedLevel}_${technique.id}`;
-  const storageKey = getTechniqueContentKey(selectedHobby, selectedLevel, technique.id)
+  const storageKey = getTechniqueContentKey(
+    selectedHobby,
+    selectedLevel,
+    technique.id,
+  );
 
   const loadTechniqueContent = useCallback(async () => {
     try {
       setIsLoading(true);
-      
+
       // Check if we have cached content
       const cachedContent = await AsyncStorage.getItem(storageKey);
-      
+
       if (cachedContent) {
         setContent(cachedContent);
         setIsLoading(false);
         return;
       }
-      
+
       // Generate new content from AI
       const generatedContent = await generateTechniqueContent(
         selectedHobby,
         selectedLevel,
-        technique
+        technique,
       );
 
-      
       // Save to cache
       await AsyncStorage.setItem(storageKey, generatedContent);
       setContent(generatedContent);
@@ -98,7 +101,9 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
     } catch (error) {
       console.error('Failed to load/generate technique content:', error);
       setIsLoading(false);
-      setContent(`# ${technique.name}\n\n${technique.description}\n\n*Could not load additional resources*`);
+      setContent(
+        `# ${technique.name}\n\n${technique.description}\n\n*Could not load additional resources*`,
+      );
     }
   }, [selectedHobby, selectedLevel, technique, storageKey]);
 
@@ -107,42 +112,40 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
   }, [loadTechniqueContent]);
 
   const handleComplete = () => {
-    
-    dispatch(updateProgress({
-      techniqueId: technique.id,
-      progress: {
-        completed: true,
-        skipped: false,
-        progress: 1,
-      },
-    }));
+    dispatch(
+      updateProgress({
+        techniqueId: technique.id,
+        progress: {
+          completed: true,
+          skipped: false,
+          progress: 1,
+        },
+      }),
+    );
     navigation.goBack();
   };
-  
+
   const handleSkip = () => {
-    
-    dispatch(updateProgress({
-      techniqueId: technique.id,
-      progress: {
-        completed: false,
-        skipped: true,
-        progress: 0,
-      },
-    }));
+    dispatch(
+      updateProgress({
+        techniqueId: technique.id,
+        progress: {
+          completed: false,
+          skipped: true,
+          progress: 0,
+        },
+      }),
+    );
     navigation.goBack();
   };
 
   if (isLoading) {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity 
-            style={styles.backButton}
-            onPress={() => navigation.goBack()}>
-            <Icon name="arrow-left" size={24} color={COLORS.title} />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>{technique.name}</Text>
-        </View>
+        <Header
+          title={technique.name}
+          onBackPress={() => navigation.goBack()}
+        />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={COLORS.action} />
           <Text style={styles.loadingText}>Generating learning content...</Text>
@@ -153,11 +156,8 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header
-        title={technique.name}
-        onBackPress={() => navigation.goBack()}
-      />
-      
+      <Header title={technique.name} onBackPress={() => navigation.goBack()} />
+
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.card}>
           <Card.Content>
@@ -170,40 +170,39 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
                       key={index}
                       name="star"
                       size={18}
-                      color={index < technique.difficulty ? COLORS.action : 'rgba(0,0,0,0.2)'}
+                      color={
+                        index < technique.difficulty
+                          ? COLORS.action
+                          : 'rgba(0,0,0,0.2)'
+                      }
                     />
                   ))}
                 </View>
               </View>
-              
+
               <View style={styles.timeContainer}>
                 <Icon name="clock-outline" size={18} color={COLORS.subtitle} />
-                <Text style={styles.metaText}>
-                  {technique.timeToMaster}
-                </Text>
+                <Text style={styles.metaText}>{technique.timeToMaster}</Text>
               </View>
             </View>
-            
-            <Markdown 
-              style={markdownStyles}
-              mergeStyle={true}
-            >
+
+            <Markdown style={markdownStyles} mergeStyle={true}>
               {content}
             </Markdown>
           </Card.Content>
         </View>
       </ScrollView>
-      
+
       {!progress.completed && !progress.skipped && (
         <View style={styles.footer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.footerButton, styles.skipButton]}
             onPress={handleSkip}>
             <Icon name="skip-forward" size={22} color={COLORS.white} />
             <Text style={styles.buttonText}>Skip</Text>
           </TouchableOpacity>
-          
-          <TouchableOpacity 
+
+          <TouchableOpacity
             style={[styles.footerButton, styles.completeButton]}
             onPress={handleComplete}>
             <Icon name="check" size={22} color={COLORS.white} />
@@ -211,20 +210,22 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
           </TouchableOpacity>
         </View>
       )}
-      
+
       {(progress.completed || progress.skipped) && (
         <View style={styles.footer}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={[styles.footerButton, styles.resetButton]}
             onPress={() => {
-              dispatch(updateProgress({
-                techniqueId: technique.id,
-                progress: {
-                  completed: false,
-                  skipped: false,
-                  progress: 0,
-                },
-              }));
+              dispatch(
+                updateProgress({
+                  techniqueId: technique.id,
+                  progress: {
+                    completed: false,
+                    skipped: false,
+                    progress: 0,
+                  },
+                }),
+              );
             }}>
             <Icon name="refresh" size={22} color={COLORS.white} />
             <Text style={styles.buttonText}>Reset Progress</Text>

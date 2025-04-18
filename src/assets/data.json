@@ -1,7 +1,88 @@
 {
   "hobbies": [
-    {"id": "1", "name": "Chess", "icon": "chess-knight", "color": "#2C3E50"},
-    {"id": "2", "name": "Poker", "icon": "cards", "color": "#E74C3C"},
-    {"id": "3", "name": "Guitar", "icon": "guitar-electric", "color": "#3498DB"}
+    {
+      "id": "1",
+      "name": "Chess",
+      "icon": "chess-knight",
+      "color": "#2C3E50",
+      "emoji": "♟️"
+    },
+    {
+      "id": "2",
+      "name": "Poker",
+      "icon": "cards",
+      "color": "#E74C3C",
+      "emoji": "🃏"
+    },
+    {
+      "id": "3",
+      "name": "Guitar",
+      "icon": "guitar-electric",
+      "color": "#3498DB",
+      "emoji": "🎸"
+    },
+    {
+      "id": "4",
+      "name": "Photography",
+      "icon": "camera",
+      "color": "#8E44AD",
+      "emoji": "📸"
+    },
+    {
+      "id": "5",
+      "name": "Programming",
+      "icon": "code-tags",
+      "color": "#16A085",
+      "emoji": "💻"
+    },
+    {
+      "id": "6",
+      "name": "Cooking",
+      "icon": "chef-hat",
+      "color": "#D35400",
+      "emoji": "👨‍🍳"
+    },
+    {
+      "id": "7",
+      "name": "Painting",
+      "icon": "palette",
+      "color": "#F39C12",
+      "emoji": "🎨"
+    },
+    {
+      "id": "8",
+      "name": "Fitness",
+      "icon": "dumbbell",
+      "color": "#C0392B",
+      "emoji": "🏋️"
+    },
+    {
+      "id": "9",
+      "name": "Writing",
+      "icon": "notebook-edit",
+      "color": "#34495E",
+      "emoji": "✍️"
+    },
+    {
+      "id": "10",
+      "name": "Gardening",
+      "icon": "flower",
+      "color": "#27AE60",
+      "emoji": "🌱"
+    },
+    {
+      "id": "11",
+      "name": "Traveling",
+      "icon": "airplane",
+      "color": "#2980B9",
+      "emoji": "🌍"
+    },
+    {
+      "id": "12",
+      "name": "Reading",
+      "icon": "book-open-page-variant",
+      "color": "#9B59B6",
+      "emoji": "📚"
+    }
   ]
 }

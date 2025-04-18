@@ -1,8 +1,13 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import hobbyData from '../assets/data.json';
+
+const hobbies = hobbyData.hobbies;
+
+type HobbyName = Lowercase<typeof hobbies[number]['name']>;
 
 type HobbyState = {
-  selected: 'chess' | 'poker' | 'guitar' | null;
+  selected: HobbyName | null;
   level: 'casual' | 'enthusiast' | 'pro' | null;
   hobbyDetails: any;
   learningPath: any[];
@@ -27,7 +32,7 @@ export const hobbySlice = createSlice({
   reducers: {
     setHobby: (
       state,
-      action: PayloadAction<'chess' | 'poker' | 'guitar' | null>,
+      action: PayloadAction<HobbyName | null>,
     ) => {
       state.selected = action.payload;
     },
