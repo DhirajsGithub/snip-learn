@@ -312,7 +312,6 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: 12,
-    elevation: 4,
   },
   metaContainer: {
     flexDirection: 'row',

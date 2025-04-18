@@ -1,21 +1,24 @@
 // src/screens/OnboardingScreen.tsx
-import React, { useRef } from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import React, {useRef, useState} from 'react';
+import {View, Text, StyleSheet, Pressable} from 'react-native';
 import LottieView from 'lottie-react-native';
-import { useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../navigation/MainNavigator';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { COLORS } from '../theme';
+import {useNavigation} from '@react-navigation/native';
+import {RootStackParamList} from '../navigation/MainNavigator';
+import {StackNavigationProp} from '@react-navigation/stack';
+import {COLORS} from '../theme';
+import AppFlowBottomSheet, {
+  AppFlowBottomSheetRef,
+} from '../components/AppFlowBottomSheet';
 
 type OnboardingNavProp = StackNavigationProp<RootStackParamList, 'Onboarding'>;
 
 const OnboardingScreen = () => {
   const animationRef = useRef<LottieView>(null);
   const navigation = useNavigation<OnboardingNavProp>();
-
   return (
     <View style={styles.container}>
       {/* Animated Header */}
+
       <LottieView
         ref={animationRef}
         source={require('../assets/animations/welcome.json')}
@@ -40,12 +43,8 @@ const OnboardingScreen = () => {
 
       {/* Get Started Button */}
       <Pressable
-        style={({ pressed }) => [
-          styles.button,
-          { opacity: pressed ? 0.8 : 1 },
-        ]}
-        onPress={() => navigation.navigate('HobbySelect')}
-      >
+        style={({pressed}) => [styles.button, {opacity: pressed ? 0.8 : 1}]}
+        onPress={() => navigation.navigate('HobbySelect')}>
         <Text style={styles.buttonText}>Get Started</Text>
       </Pressable>
     </View>
@@ -58,7 +57,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
-    backgroundColor: '#FFF',
+    backgroundColor: COLORS.bg1,
   },
   animation: {
     width: 300,
@@ -70,6 +69,7 @@ const styles = StyleSheet.create({
     marginVertical: 30,
   },
   title: {
+    textAlign: 'center',
     fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 10,

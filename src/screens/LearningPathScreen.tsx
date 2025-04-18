@@ -205,18 +205,26 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.loadingContainer}>
-        <Text style={styles.loadingTitle}>
-          Crafting your personalized learning path
-        </Text>
-        <Text style={styles.loadingSubtitle}>
-          We're filtering out useless YouTube videos...
-        </Text>
-        <ActivityIndicator
-          size="large"
-          color={COLORS.action}
-          style={styles.loader}
+      <SafeAreaView style={styles.container}>
+        <Header
+          title="Getting your paths ready 🚀"
+          onBackPress={() => navigation.goBack()}
         />
+
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingTitle}>
+            Crafting your personalized learning path
+          </Text>
+          <Text style={styles.loadingSubtitle}>
+            Finding the perfect 5-8 techniques{'\n'}
+            to get you started...
+          </Text>
+          <ActivityIndicator
+            size="large"
+            color={COLORS.action}
+            style={styles.loader}
+          />
+        </View>
       </SafeAreaView>
     );
   }
@@ -235,7 +243,7 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
       )}
 
       <Header
-        title={`Your 8-Step Path to ${selectedLevel} ${selectedHobby}`}
+        title={`Your ${learningPath.length}-Step Path to ${selectedLevel} ${selectedHobby}`}
         onBackPress={() => navigation.goBack()}
       />
 

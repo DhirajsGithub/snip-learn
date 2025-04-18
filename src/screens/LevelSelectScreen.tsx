@@ -60,11 +60,6 @@ const LevelSelectScreen = () => {
       <Header
         title="Select Level"
         onBackPress={() => navigation.goBack()}
-        children={
-          <TouchableOpacity>
-            <Icon name="help-circle-outline" size={24} color="#6C5CE7" />
-          </TouchableOpacity>
-        }
       />
       <View style={styles.innerContianer}>
         <Text style={styles.header}>

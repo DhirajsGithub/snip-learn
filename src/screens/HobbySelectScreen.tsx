@@ -1,14 +1,26 @@
-import React from 'react';
-import {View, Text, StyleSheet, ScrollView, Pressable, Alert} from 'react-native';
+import React, {useRef, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Pressable,
+  Alert,
+  TouchableOpacity,
+} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../navigation/MainNavigator';
 import HobbyCard from '../components/HobbyCard';
 import {SafeAreaView} from 'react-native-safe-area-context';
-import { setHobby, setHobbyDetails } from '../slices/hobbySlice';
-import { useDispatch } from 'react-redux';
-import { COLORS } from '../theme';
-import {hobbies} from "../assets/data.json"
+import {setHobby, setHobbyDetails} from '../slices/hobbySlice';
+import {useDispatch} from 'react-redux';
+import {COLORS} from '../theme';
+import {hobbies} from '../assets/data.json';
+import AppFlowBottomSheet, {
+} from '../components/AppFlowBottomSheet';
+import AppFlowContent from '../components/AppFlowContent';
 
 type HobbySelectNavProp = StackNavigationProp<
   RootStackParamList,
@@ -18,35 +30,57 @@ type HobbySelectNavProp = StackNavigationProp<
 const HobbySelectScreen = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation<HobbySelectNavProp>();
-  return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.header}>Choose Your Hobby</Text>
-          <Text style={styles.subheader}>Select what excites you most</Text>
-        </View>
+  const [isBottomSheetVisible, setIsBottomSheetVisible] = useState(false);
 
-        <ScrollView
-          contentContainerStyle={styles.scrollContainer}
-          showsVerticalScrollIndicator={false}>
-          {hobbies.map(hobby => (
-            <HobbyCard
-              key={hobby.id}
-              onChevronPress={() => {
-                dispatch(setHobby(hobby.name as any))
-                dispatch(setHobbyDetails(hobby));
-                navigation.navigate('LevelSelect');
-              }}
-              hobby={hobby}
-            />
-          ))}
-        </ScrollView>
-      </View>
-    </SafeAreaView>
+  const handleCloseSheet = () => {
+    setIsBottomSheetVisible(false);
+  };
+
+  return (
+    <View style={styles.wrapper}>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.container}>
+          <View style={styles.headerWrapper}>
+            <View style={styles.headerContainer}>
+              <Text style={styles.header}>Choose Your Hobby</Text>
+              <Text style={styles.subheader}>Select what excites you most</Text>
+            </View>
+            <TouchableOpacity onPress={() => setIsBottomSheetVisible(true)}>
+              <Icon name="help-circle-outline" size={24} color="#6C5CE7" />
+            </TouchableOpacity>
+          </View>
+
+          <ScrollView
+            contentContainerStyle={styles.scrollContainer}
+            showsVerticalScrollIndicator={false}>
+            {hobbies.map(hobby => (
+              <HobbyCard
+                key={hobby.id}
+                onChevronPress={() => {
+                  dispatch(setHobby(hobby.name as any));
+                  dispatch(setHobbyDetails(hobby));
+                  navigation.navigate('LevelSelect');
+                }}
+                hobby={hobby}
+              />
+            ))}
+          </ScrollView>
+        </View>
+      </SafeAreaView>
+      <AppFlowBottomSheet
+        visible={isBottomSheetVisible}
+        onClose={handleCloseSheet}>
+        <AppFlowContent />
+      </AppFlowBottomSheet>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+    position: 'relative',
+  },
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.bg1,
@@ -55,12 +89,16 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 16,
   },
-  headerContainer: {
-    paddingVertical: 24,
-    paddingHorizontal: 8,
+  headerWrapper: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    gap: 20,
   },
+  headerContainer: {},
   header: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: '800',
     color: COLORS.title,
     marginBottom: 4,

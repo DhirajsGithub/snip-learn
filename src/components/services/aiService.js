@@ -1,10 +1,7 @@
-// src/services/aiService.js
 import {GoogleGenerativeAI} from '@google/generative-ai';
+import {GEMINI_API} from '@env'
 import hobbyData from '../../assets/data.json';
-
-// Replace with your API key
-const API_KEY = 'AIzaSyCaYVuWzDQYCXqLZ9cC87lZaHexReJBaFE';
-const genAI = new GoogleGenerativeAI(API_KEY);
+const genAI = new GoogleGenerativeAI(GEMINI_API);
 
 export const generateLearningPath = async (hobby, level) => {
   try {
