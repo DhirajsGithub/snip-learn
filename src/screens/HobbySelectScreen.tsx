@@ -18,8 +18,7 @@ import {setHobby, setHobbyDetails} from '../slices/hobbySlice';
 import {useDispatch} from 'react-redux';
 import {COLORS} from '../theme';
 import {hobbies} from '../assets/data.json';
-import AppFlowBottomSheet, {
-} from '../components/AppFlowBottomSheet';
+import AppFlowBottomSheet from '../components/AppFlowBottomSheet';
 import AppFlowContent from '../components/AppFlowContent';
 
 type HobbySelectNavProp = StackNavigationProp<
@@ -37,49 +36,47 @@ const HobbySelectScreen = () => {
   };
 
   return (
-    <View style={styles.wrapper}>
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.container}>
-          <View style={styles.headerWrapper}>
-            <View style={styles.headerContainer}>
-              <Text style={styles.header}>Choose Your Hobby</Text>
-              <Text style={styles.subheader}>Select what excites you most</Text>
-            </View>
-            <TouchableOpacity onPress={() => setIsBottomSheetVisible(true)}>
-              <Icon name="help-circle-outline" size={24} color="#6C5CE7" />
-            </TouchableOpacity>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        <View style={styles.headerWrapper}>
+          <View style={styles.headerContainer}>
+            <Text style={styles.header}>Choose Your Hobby</Text>
+            <Text style={styles.subheader}>Select what excites you most</Text>
           </View>
-
-          <ScrollView
-            contentContainerStyle={styles.scrollContainer}
-            showsVerticalScrollIndicator={false}>
-            {hobbies.map(hobby => (
-              <HobbyCard
-                key={hobby.id}
-                onChevronPress={() => {
-                  dispatch(setHobby(hobby.name as any));
-                  dispatch(setHobbyDetails(hobby));
-                  navigation.navigate('LevelSelect');
-                }}
-                hobby={hobby}
-              />
-            ))}
-          </ScrollView>
+          <TouchableOpacity onPress={() => setIsBottomSheetVisible(true)}>
+            <Icon name="help-circle-outline" size={24} color="#6C5CE7" />
+          </TouchableOpacity>
         </View>
-      </SafeAreaView>
+
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          showsVerticalScrollIndicator={false}>
+          {hobbies.map(hobby => (
+            <HobbyCard
+              key={hobby.id}
+              onChevronPress={() => {
+                dispatch(setHobby(hobby.name as any));
+                dispatch(setHobbyDetails(hobby));
+                navigation.navigate('LevelSelect');
+              }}
+              hobby={hobby}
+            />
+          ))}
+        </ScrollView>
+      </View>
       <AppFlowBottomSheet
         visible={isBottomSheetVisible}
         onClose={handleCloseSheet}>
         <AppFlowContent />
       </AppFlowBottomSheet>
-    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    position: 'relative',
+    // position: 'relative',
   },
   safeArea: {
     flex: 1,
