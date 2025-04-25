@@ -5,6 +5,7 @@ import HobbySelectScreen from '../screens/HobbySelectScreen';
 import LevelSelectScreen from '../screens/LevelSelectScreen';
 import LearningPathScreen from '../screens/LearningPathScreen';
 import TechniqueDetailScreen from '../screens/TechniqueDetailScreen';
+import CustomLevelScreen from '../screens/CustomLevelScreen';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -12,6 +13,7 @@ export type RootStackParamList = {
   LevelSelect: undefined;
   LearningPath: undefined;
   TechniqueDetail: {technique: any};
+  CustomLevelScreen : undefined
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
@@ -58,6 +60,13 @@ export const MainNavigator = () => {
        <Stack.Screen
         name="TechniqueDetail"
         component={TechniqueDetailScreen}
+        options={{
+          gestureDirection: 'horizontal',
+        }}
+      />
+       <Stack.Screen
+        name="CustomLevelScreen"
+        component={CustomLevelScreen}
         options={{
           gestureDirection: 'horizontal',
         }}

@@ -9,7 +9,7 @@ type HobbyType = {
 type LevelType = {
     id: string;
     name: string;
-    icon? : string;
+    icon : string;
     description: string;
     timeCommitment: string;
 }

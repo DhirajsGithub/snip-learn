@@ -9,3 +9,7 @@ export const getLearningPathKey = (hobby: string, level: string)=>{
 export const getTechniqueContentKey = (hobby: string, level: string, techniqueId: string)=>{
     return `TECHNIQUE_CONTENT_V2_${hobby}_${level}_${techniqueId}`
 }
+
+export const getLevelKey = (hobby: string) =>{
+    return `Level_V2_${hobby}`
+}
