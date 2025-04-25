@@ -6,14 +6,6 @@ import * as Progress from 'react-native-progress';
 import {COLORS} from '../theme';
 import {Swipeable} from 'react-native-gesture-handler';
 
-type Technique = {
-  id: string;
-  name: string;
-  description: string;
-  timeToMaster: string;
-  difficulty: number;
-  prerequisites: string[];
-};
 
 type TechniqueProgress = {
   completed: boolean;
@@ -29,9 +21,11 @@ type TechniqueCardProps = {
   onTap: () => void;
 };
 
+// 🧠 Imports and types remain the same
+
 const TechniqueCard: React.FC<TechniqueCardProps> = ({
   technique,
-  progress = {completed: false, skipped: false, progress: 0},
+  progress = { completed: false, skipped: false, progress: 0 },
   onComplete,
   onSkip,
   onTap,
@@ -67,6 +61,7 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({
             progress.skipped && styles.skippedCard,
           ]}>
           <Card.Content>
+            {/* Header Section */}
             <View style={styles.header}>
               <Text
                 style={[
@@ -75,6 +70,9 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({
                   progress.skipped && styles.skippedText,
                 ]}>
                 {technique.name}
+                {technique.optional && (
+                  <Text style={styles.optionalBadge}>  (Optional)</Text>
+                )}
                 {progress.completed && (
                   <Text style={styles.completedBadge}> ✓</Text>
                 )}
@@ -82,6 +80,7 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({
                   <Text style={styles.skippedBadge}> ⤑</Text>
                 )}
               </Text>
+              {/* Difficulty Stars */}
               <View style={styles.difficultyContainer}>
                 {[...Array(5)].map((_, index) => (
                   <Icon
@@ -97,6 +96,8 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({
                 ))}
               </View>
             </View>
+
+            {/* Description */}
             <Text
               style={[
                 styles.description,
@@ -105,6 +106,18 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({
               ]}>
               {technique.description}
             </Text>
+
+            {/* Prerequisites */}
+            {technique.prerequisites.length > 0 && (
+              <View style={styles.prerequisiteContainer}>
+                <Text style={styles.prerequisiteTitle}>Requires:</Text>
+                {technique.prerequisites.map((p, idx) => (
+                  <Text key={idx} style={styles.prerequisiteItem}>• {p}</Text>
+                ))}
+              </View>
+            )}
+
+            {/* Footer */}
             <View style={styles.footer}>
               <View style={styles.timeContainer}>
                 <Icon
@@ -142,6 +155,7 @@ const TechniqueCard: React.FC<TechniqueCardProps> = ({
     </Swipeable>
   );
 };
+
 
 const styles = StyleSheet.create({
   card: {
@@ -234,6 +248,26 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 4,
   },
+  optionalBadge: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: COLORS.subtitle,
+  },
+  prerequisiteContainer: {
+    marginTop: 8,
+  },
+  prerequisiteTitle: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: COLORS.subtitle,
+    marginBottom: 2,
+  },
+  prerequisiteItem: {
+    fontSize: 13,
+    color: COLORS.subtitle,
+    marginLeft: 8,
+  },
+
 });
 
 export default TechniqueCard;

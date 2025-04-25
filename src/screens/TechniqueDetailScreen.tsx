@@ -19,14 +19,6 @@ import {generateTechniqueContent} from '../components/services/aiService';
 import Header from '../components/common/Header';
 import {getTechniqueContentKey} from '../utils/localStorage.Utils';
 
-type Technique = {
-  id: string;
-  name: string;
-  description: string;
-  timeToMaster: string;
-  difficulty: number;
-  prerequisites: string[];
-};
 
 type TechniqueDetailScreenProps = {
   navigation: any;

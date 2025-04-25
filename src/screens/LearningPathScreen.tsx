@@ -26,22 +26,6 @@ import {generateLearningPath} from '../components/services/aiService';
 import Header from '../components/common/Header';
 import {getLearningPathKey, getProgressKey} from '../utils/localStorage.Utils';
 
-type Technique = {
-  id: string;
-  name: string;
-  description: string;
-  timeToMaster: string;
-  difficulty: number;
-  prerequisites: string[];
-};
-
-type ProgressState = {
-  [key: string]: {
-    completed: boolean;
-    skipped: boolean;
-    progress: number;
-  };
-};
 
 type LearningPathScreenProps = {
   navigation: any;
@@ -73,9 +57,9 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
 
   const pathStorageKey = getLearningPathKey(hobbyDetails?.id || "", levelDetails?.id || "");
   const progressStorageKey = getProgressKey(hobbyDetails?.id || "", levelDetails?.id || "");
-  console.log("pathStorageKey ", pathStorageKey)
-  console.log("progressStorageKey ", progressStorageKey)
+
   const loadLearningPath = useCallback(async () => {
+    
     try {
       setIsLoading(true);
       // Check if we have a cached version in AsyncStorage
@@ -110,7 +94,7 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
       // If no cached version, generate a new one
       const path: Technique[] = await generateLearningPath(
         selectedHobby,
-        selectedLevel,
+        levelDetails || selectedLevel,
       );
       if (!path) {
         Alert.alert(
@@ -142,6 +126,9 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
       setShowConfetti(true);
     } catch (error) {
       console.error('Failed to load/generate path:', error);
+     
+    }
+    finally{
       setIsLoading(false);
     }
   }, [selectedHobby, selectedLevel, dispatch, progress, pathStorageKey]);

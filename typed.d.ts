@@ -29,3 +29,14 @@ type HobbyState = {
       }
     >;
   };
+
+  type Technique = {
+    id: string;
+    name: string;
+    description: string;
+    timeToMaster: string;
+    difficulty: number;
+    prerequisites: string[];
+    optional: boolean;
+    timeToMaster: string
+  };
