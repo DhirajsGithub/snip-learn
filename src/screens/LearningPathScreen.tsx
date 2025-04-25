@@ -16,7 +16,6 @@ import ConfettiCannon from 'react-native-confetti-cannon';
 import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import {COLORS} from '../theme';
 import TechniqueCard from '../components/TechniqueCard';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import * as Progress from 'react-native-progress';
 import {
   setLearningPath,
@@ -48,7 +47,6 @@ type LearningPathScreenProps = {
   navigation: any;
 };
 
-const STORAGE_KEY_PREFIX = 'LEARNING_PATH_';
 
 const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
   navigation,
@@ -57,10 +55,11 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
   const {
     selected: selectedHobby,
     level: selectedLevel,
+    levelDetails,
     hobbyDetails,
     learningPath,
     progress,
-  } = useSelector((state: any) => state.hobby);
+  } = useSelector((state: {hobby: HobbyState}) => state.hobby);
 
   const [isLoading, setIsLoading] = useState(true);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -72,9 +71,10 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
     ignoreAndroidSystemSettings: false,
   };
 
-  const pathStorageKey = getLearningPathKey(selectedHobby, selectedLevel);
-  const progressStorageKey = getProgressKey(selectedHobby, selectedLevel);
-
+  const pathStorageKey = getLearningPathKey(hobbyDetails?.id || "", levelDetails?.id || "");
+  const progressStorageKey = getProgressKey(hobbyDetails?.id || "", levelDetails?.id || "");
+  console.log("pathStorageKey ", pathStorageKey)
+  console.log("progressStorageKey ", progressStorageKey)
   const loadLearningPath = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -243,7 +243,7 @@ const LearningPathScreen: React.FC<LearningPathScreenProps> = ({
       )}
 
       <Header
-        title={`Your ${learningPath.length}-Step Path to ${selectedLevel} ${selectedHobby}`}
+        title={`Select ${hobbyDetails?.name} Level`}
         onBackPress={() => navigation.goBack()}
       />
 

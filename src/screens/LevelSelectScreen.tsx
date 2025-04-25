@@ -1,54 +1,43 @@
-// src/screens/LevelSelectScreen.tsx
 import React, {useState} from 'react';
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity} from 'react-native';
-import {useNavigation, useRoute} from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 import {StackNavigationProp} from '@react-navigation/stack';
 import {RootStackParamList} from '../navigation/MainNavigator';
 import LevelCard from '../components/LevelCard';
 import Button from '../components/Button';
 import {useDispatch, useSelector} from 'react-redux';
-import {setLevel} from '../slices/hobbySlice';
+import {setLevel, setLevelDetails} from '../slices/hobbySlice';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import Header from '../components/common/Header';
-import { COLORS } from '../theme';
-
+import {COLORS} from '../theme';
+import {prebuilt_levels} from '../assets/data.json';
 
 type LevelSelectNavProp = StackNavigationProp<
   RootStackParamList,
   'LevelSelect'
 >;
 
-const levels = [
-  {
-    id: 'casual',
-    name: 'Casual',
-    icon: 'emoticon-happy',
-    description: 'Learn the basics to enjoy your hobby',
-    timeCommitment: '2-3 hrs/week',
-  },
-  {
-    id: 'enthusiast',
-    name: 'Enthusiast',
-    icon: 'rocket-launch',
-    description: 'Build solid skills to impress others',
-    timeCommitment: '4-6 hrs/week',
-  },
-  {
-    id: 'pro',
-    name: 'Pro',
-    icon: 'trophy',
-    description: 'Master advanced techniques for competition',
-    timeCommitment: '8+ hrs/week',
-  },
-];
 const LevelSelectScreen = () => {
   const navigation = useNavigation<LevelSelectNavProp>();
+  const {hobbyDetails} = useSelector(
+    (state: {hobby: HobbyState}) => state.hobby,
+  );
+
   const dispatch = useDispatch();
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
-  const {hobbyDetails} = useSelector((state: any) => state?.hobby);
+  const [levelDetailsLocal, setLevelDetailsLocal] = useState<LevelType | null>(
+    null,
+  );
 
   const handleContinue = () => {
+    if (levelDetailsLocal) {
+      dispatch(setLevelDetails(levelDetailsLocal));
+    }
     if (selectedLevel) {
       dispatch(setLevel(selectedLevel as 'casual' | 'enthusiast' | 'pro'));
       navigation.navigate('LearningPath');
@@ -57,10 +46,7 @@ const LevelSelectScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header
-        title="Select Level"
-        onBackPress={() => navigation.goBack()}
-      />
+      <Header title="Select Hobby" onBackPress={() => navigation.goBack()} />
       <View style={styles.innerContianer}>
         <Text style={styles.header}>
           How serious are you about{' '}
@@ -68,13 +54,18 @@ const LevelSelectScreen = () => {
         </Text>
         <Text style={styles.subheader}>We'll customize your learning path</Text>
 
-        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.levelsContainer}>
-          {levels.map(level => (
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.levelsContainer}>
+          {prebuilt_levels.map((level: LevelType) => (
             <LevelCard
               key={level.id}
               level={level}
               isSelected={selectedLevel === level.id}
-              onPress={() => setSelectedLevel(level.id)}
+              onPress={() => {
+                setSelectedLevel(level.id);
+                setLevelDetailsLocal(level);
+              }}
             />
           ))}
         </ScrollView>
@@ -96,7 +87,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.bg1,
   },
-  innerContianer:{
+  innerContianer: {
     padding: 24,
     paddingBottom: 12,
     flex: 1,

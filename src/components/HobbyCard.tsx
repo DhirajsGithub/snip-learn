@@ -10,13 +10,13 @@ const HobbyCard = ({
   hobby,
   onChevronPress,
 }: {
-  hobby: { id: string; name: string; icon: string; color: string };
+  hobby: HobbyType;
   onChevronPress: () => void;
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
   
   // Handle chevron press without flipping the card
-  const handleChevronPress = (event) => {
+  const handleChevronPress = (event : any) => {
     // Stop event propagation to prevent the card from flipping
     event.stopPropagation();
     onChevronPress();

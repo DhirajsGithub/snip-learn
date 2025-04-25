@@ -51,7 +51,7 @@ const HobbySelectScreen = () => {
         <ScrollView
           contentContainerStyle={styles.scrollContainer}
           showsVerticalScrollIndicator={false}>
-          {hobbies.map(hobby => (
+          {hobbies.map((hobby : HobbyType) => (
             <HobbyCard
               key={hobby.id}
               onChevronPress={() => {

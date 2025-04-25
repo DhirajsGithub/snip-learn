@@ -84,5 +84,29 @@
       "color": "#9B59B6",
       "emoji": "📚"
     }
+  ],
+
+  "prebuilt_levels": [
+    {
+      "id": "1",
+      "name": "Casual",
+      "icon": "emoticon-happy",
+      "description": "Learn the basics to enjoy your hobby",
+      "timeCommitment": "2-3 hrs/week"
+    },
+    {
+      "id": "2",
+      "name": "Enthusiast",
+      "icon": "rocket-launch",
+      "description": "Build solid skills to impress others",
+      "timeCommitment": "4-6 hrs/week"
+    },
+    {
+      "id": "3",
+      "name": "Pro",
+      "icon": "trophy",
+      "description": "Master advanced techniques for competition",
+      "timeCommitment": "8+ hrs/week"
+    }
   ]
 }

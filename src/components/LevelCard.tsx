@@ -5,13 +5,7 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import {COLORS} from '../theme';
 
 type LevelCardProps = {
-  level: {
-    id: string;
-    name: string;
-    icon: string;
-    description: string;
-    timeCommitment: string;
-  };
+  level: LevelType;
   isSelected: boolean;
   onPress: () => void;
 };

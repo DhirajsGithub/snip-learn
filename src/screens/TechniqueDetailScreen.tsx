@@ -14,7 +14,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Markdown from 'react-native-markdown-display';
 import {COLORS} from '../theme';
 import {useSelector, useDispatch} from 'react-redux';
-import ReactNativeHapticFeedback from 'react-native-haptic-feedback';
 import {updateProgress} from '../slices/hobbySlice';
 import {generateTechniqueContent} from '../components/services/aiService';
 import Header from '../components/common/Header';
@@ -38,7 +37,6 @@ type TechniqueDetailScreenProps = {
   };
 };
 
-const STORAGE_KEY_PREFIX = 'TECHNIQUE_CONTENT_';
 
 const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
   navigation,
@@ -46,12 +44,12 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
 }) => {
   const {technique} = route.params;
   const dispatch = useDispatch();
-  const {selected: selectedHobby, level: selectedLevel} = useSelector(
-    (state: any) => state.hobby,
+  const {selected: selectedHobby, level: selectedLevel, levelDetails, hobbyDetails} = useSelector(
+    (state: {hobby: HobbyState}) => state.hobby,
   );
 
   const progress = useSelector(
-    (state: any) =>
+    (state: {hobby: HobbyState}) =>
       state.hobby.progress[technique.id] || {
         completed: false,
         skipped: false,
@@ -62,17 +60,13 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
   const [content, setContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
 
-  const hapticOptions = {
-    enableVibrateFallback: true,
-    ignoreAndroidSystemSettings: false,
-  };
-
-  // const storageKey = `${STORAGE_KEY_PREFIX}${selectedHobby}_${selectedLevel}_${technique.id}`;
   const storageKey = getTechniqueContentKey(
-    selectedHobby,
-    selectedLevel,
+    hobbyDetails?.id || "",
+    levelDetails?.id || "",
     technique.id,
   );
+
+  console.log("storageKey ", storageKey)
 
   const loadTechniqueContent = useCallback(async () => {
     try {
@@ -143,7 +137,7 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
     return (
       <SafeAreaView style={styles.container}>
         <Header
-          title={technique.name}
+          title={"Getting your content ready 🚀"}
           onBackPress={() => navigation.goBack()}
         />
         <View style={styles.loadingContainer}>
@@ -156,7 +150,7 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
 
   return (
     <SafeAreaView style={styles.container}>
-      <Header title={technique.name} onBackPress={() => navigation.goBack()} />
+      <Header title={"Select Learning Path"} onBackPress={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.card}>
