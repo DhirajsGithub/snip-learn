@@ -121,7 +121,7 @@ const LevelSelectScreen = () => {
 
 const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: COLORS.bg1},
-  innerContianer: {paddingHorizontal: 20, flex: 1},
+  innerContianer: {paddingHorizontal: 20, paddingTop: 16, flex: 1},
   header: {
     fontSize: 28,
     fontWeight: '800',

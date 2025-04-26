@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    marginTop: 12,
+    marginTop: 16,
     paddingBottom: 80, // Add space for the footer
   },
   card: {

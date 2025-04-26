@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import FlipCard from 'react-native-flip-card';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Platform } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Dimensions,
+  TouchableOpacity,
+  Platform,
+} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 const CARD_WIDTH = width * 0.4;
 
 const HobbyCard = ({
@@ -14,9 +21,9 @@ const HobbyCard = ({
   onChevronPress: () => void;
 }) => {
   const [isFlipped, setIsFlipped] = useState(false);
-  
+
   // Handle chevron press without flipping the card
-  const handleChevronPress = (event : any) => {
+  const handleChevronPress = (event: any) => {
     // Stop event propagation to prevent the card from flipping
     event.stopPropagation();
     onChevronPress();
@@ -25,19 +32,18 @@ const HobbyCard = ({
   return (
     <FlipCard
       style={styles.card}
-      friction={12}
-      perspective={1800}
+      friction={6}
+      perspective={1000}
       flipHorizontal={true}
       flipVertical={false}
-      clickable={false} 
-      flip={isFlipped} 
-    >
+      clickable={false}
+      useNativeDriver={true}
+      flip={isFlipped}>
       {/* Front Side */}
       <TouchableOpacity
         activeOpacity={0.95}
-        style={[styles.face, { backgroundColor: hobby.color }]}
-        onPress={() => setIsFlipped(true)}
-      >
+        style={[styles.face, {backgroundColor: hobby.color}]}
+        onPress={() => setIsFlipped(true)}>
         <View style={styles.iconContainer}>
           <Icon name={hobby.icon} size={60} color="white" />
         </View>
@@ -47,24 +53,18 @@ const HobbyCard = ({
       {/* Back Side */}
       <TouchableOpacity
         activeOpacity={0.95}
-        style={[styles.back, { backgroundColor: hobby.color }]}
-        onPress={() => setIsFlipped(false)}
-      >
+        style={[styles.back, {backgroundColor: hobby.color}]}
+        onPress={() => setIsFlipped(false)}>
         <Text style={styles.description}>
           Tap to explore {hobby.name.toLowerCase()} techniques
         </Text>
-        
-        <TouchableOpacity 
-          onPress={handleChevronPress} 
+
+        <TouchableOpacity
+          onPress={handleChevronPress}
           activeOpacity={0.7}
-          style={styles.chevronContainer}
-        >
+          style={styles.chevronContainer}>
           <View style={styles.chevronButton}>
-            <Icon
-              name="chevron-double-right"
-              size={28}
-              color="white"
-            />
+            <Icon name="chevron-double-right" size={28} color="white" />
           </View>
         </TouchableOpacity>
       </TouchableOpacity>
@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
     ...Platform.select({
       ios: {
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: 4 },
+        shadowOffset: {width: 0, height: 4},
         shadowOpacity: 0.3,
         shadowRadius: 6,
       },
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     textAlign: 'center',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 2,
   },
   description: {
@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     fontWeight: '600',
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
-    textShadowOffset: { width: 1, height: 1 },
+    textShadowOffset: {width: 1, height: 1},
     textShadowRadius: 1,
   },
   chevronContainer: {

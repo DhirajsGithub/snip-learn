@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
   iconGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     marginTop: 5,
   },
