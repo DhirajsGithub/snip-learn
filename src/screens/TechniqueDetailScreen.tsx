@@ -58,8 +58,6 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
     technique.id,
   );
 
-  console.log("storageKey ", storageKey)
-
   const loadTechniqueContent = useCallback(async () => {
     try {
       setIsLoading(true);
@@ -76,7 +74,7 @@ const TechniqueDetailScreen: React.FC<TechniqueDetailScreenProps> = ({
       // Generate new content from AI
       const generatedContent = await generateTechniqueContent(
         selectedHobby,
-        selectedLevel,
+        levelDetails,
         technique,
       );
 
