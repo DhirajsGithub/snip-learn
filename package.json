@@ -8,9 +8,7 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "web": "webpack serve --config webpack.config.js",
-    "start:web": "webpack serve --config webpack.config.js",
-    "build:web": "webpack --config webpack.config.js"
+    "web": "webpack serve --config webpack.config.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
