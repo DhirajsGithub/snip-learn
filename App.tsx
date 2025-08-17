@@ -7,19 +7,27 @@ import {NavigationContainer} from '@react-navigation/native';
 import {MainNavigator} from './src/navigation/MainNavigator';
 import Orientation from 'react-native-orientation-locker';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { StatusBar, Text, View } from 'react-native';
+import { StatusBar } from 'react-native';
 import { COLORS } from './src/theme';
 
 
 
 const App = () => {
-  console.log("App rendered!");
+  useEffect(() => {
+    Orientation.lockToPortrait(); 
+  }, []);
   return (
-    <View>
-      <Text style={{color: "black"}}>Hello Wefdfb!</Text>
-    </View>
+    <SafeAreaProvider>
+      <StatusBar backgroundColor={COLORS.bg1} barStyle="dark-content" />
+      <Provider store={store}>
+        <NavigationContainer>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+          <MainNavigator />
+          </GestureHandlerRootView>
+        </NavigationContainer>
+      </Provider>
+    </SafeAreaProvider>
   );
 };
-
 
 export default App;
